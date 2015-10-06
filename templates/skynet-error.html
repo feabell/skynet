@@ -1,0 +1,7 @@
+<!doctype html>
+<title>Skynet Test</title>
+{% if request.headers['Eve-Trusted'] == 'No' %}
+  <body onload="CCPEVE.requestTrust('http://feabell.com:5000')">
+{% else %}
+  <h1>An error occured</h1>
+{% endif %}

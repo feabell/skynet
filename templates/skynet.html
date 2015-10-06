@@ -3,15 +3,20 @@
 {% if request.headers['Eve-Trusted'] == 'No' %}
   <body onload="CCPEVE.requestTrust('http://feabell.com:5000')">
 {% else %}
-  <h1>Hello {{ request.headers['Eve-charname'] }}! You were on {{ name }}'s fleet.</h1>
-  <h3>Please leave some feedback</h3>
-  <form action="/" method="post">
-	<input type="hidden" name="fleetid" value="{{ fleetid }}"
-	<input type="hidden" name="Eve-Charname" value="{{ request.headers['Eve-charname'] }}">
-	<input type="hidden" name="Eve-Shiptypename" value="{{ request.headers['Eve-Shiptypename'] }}">
-	<input type="hidden" name="Eve-Charid" value="{{ request.headers['Eve-charid'] }}">
-	<input type="hidden" name="Eve-charname" value="{{ request.headers['Eve-charname'] }}">
-	<textarea rows="10" cols="100">Type your feedback here</textarea>
+  <h1>Hello {{ request.headers.get('Eve-charname') }}! You were on {{ name }}'s fleet.</h1>
+  <h3>Please rate the fleet and leave some feedback!</h3>
+  <form action="/fleet/{{ fleetid }}" method="POST">
+	<input type="hidden" name="fleetid" value="{{ fleetid }}">
+	<input type="hidden" name="Eve-Charname" value="{{ request.headers.get('Eve-Charname') }}">
+	<input type="hidden" name="Eve-Shiptypename" value="{{ request.headers.get('Eve-Shiptypename') }}">
+	<input type="hidden" name="Eve-Charid" value="{{ request.headers.get('Eve-Charid') }}">
+	<input type="hidden" name="Eve-Corpname" value="{{ request.headers.get('Eve-Corpname') }}">
+	(Terrible) 1<input type="radio" name="rating" value="1">
+	<input type="radio" name="rating" value="2">
+	<input type="radio" name="rating" value="3">
+	<input type="radio" name="rating" value="4">
+	<input type="radio" name="rating" value="5"> 5 (Amazing)<br><br>
+	<textarea name="feedback" rows="10" cols="100">Type your feedback here</textarea>
 	<br><input type="submit" value="Submit">
   </form>
 {% endif %}
