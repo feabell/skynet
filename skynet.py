@@ -7,13 +7,7 @@ app = Flask(__name__)
 def main():
 	print request.headers	
 
-	if check_igb():
-		return "using the ingame browser!"
-	else:
-		return "this won't work"
-
-def check_igb():
-	return True	
-
+	return render_template('skynet.html'
+)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
