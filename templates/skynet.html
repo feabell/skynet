@@ -6,6 +6,7 @@
   <h1>Hello {{ request.headers['Eve-charname'] }}! You were on {{ name }}'s fleet.</h1>
   <h3>Please leave some feedback</h3>
   <form action="/" method="post">
+	<input type="hidden" name="fleetid" value="{{ fleetid }}"
 	<input type="hidden" name="Eve-Charname" value="{{ request.headers['Eve-charname'] }}">
 	<input type="hidden" name="Eve-Shiptypename" value="{{ request.headers['Eve-Shiptypename'] }}">
 	<input type="hidden" name="Eve-Charid" value="{{ request.headers['Eve-charid'] }}">
