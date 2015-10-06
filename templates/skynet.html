@@ -1,0 +1,7 @@
+<!doctype html>
+<title>Skynet Test</title>
+{% if request.headers['Eve=Trusted'] == 'No' %}
+  <body onload="CCPEVE.requestTrust('http://wiki.eveonline.com')">
+{% else %}
+  <h1>Hello World!</h1>
+{% endif %}
