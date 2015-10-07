@@ -2,8 +2,9 @@
 <title>Skynet Test</title>
 {% if request.headers['Eve-Trusted'] == 'No' %}
   <body onload="CCPEVE.requestTrust('http://feabell.com:5000')">
-{% else %}
+{% elif request.headers['Eve-Trusted'] == 'Yes' %}
   <h1>Hello {{ request.headers.get('Eve-charname') }}! You were on {{ name }}'s fleet.</h1>
+  <p>"{{ description }}"
   <h3>Please rate the fleet and leave some feedback!</h3>
   <form action="/fleet/{{ fleetid }}" method="POST">
 	<input type="hidden" name="fleetid" value="{{ fleetid }}">
@@ -19,4 +20,6 @@
 	<textarea name="feedback" rows="10" cols="100">Type your feedback here</textarea>
 	<br><input type="submit" value="Submit">
   </form>
+{% else %}
+  <h1>This can only be accessed using the Eve In-game browser</h1>
 {% endif %}

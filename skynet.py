@@ -4,27 +4,69 @@ from flask import render_template
 from flask import g
 from datetime import datetime, timedelta
 import sqlite3
+import string
+import random
+import json
 
 app = Flask(__name__)
 
 database = 'skynet.db'
+
+@app.route('/feedback')
+@app.route('/feedback/')
+def getFleets():
+
+	fleets = query_db('select fleetid, fcname, description, created from fleets')
+
+	return json.dumps([dict(ix) for ix in fleets])
+
+
+@app.route('/feedback/<fleetid>')
+def results(fleetid):
+
+	feedback = query_db('select pilotid, pilotname, shiptypename, rating, feedback from participants where fleetid =?', [fleetid])
+
+	return json.dumps( [dict(ix) for ix in feedback] )
+
 
 @app.route('/fleet')
 @app.route('/fleet/')
 def default():
 	return render_template('skynet-landing.html')
 
+@app.route('/new', methods=['POST'])
+@app.route('/new/', methods=['POST'])
+def new():
+	#grap data from the POST
+	data = json.loads(request.data)
+	
+	#generate a fleetid
+	fleetid = ''.join(random.choice(string.ascii_uppercase) for i in range(10))
+	fcname =  data['fcname']
+	description = data['description']
+
+	#create a new fleet record
+	insert_db('insert into fleets (fleetid, fcname, description, created) values (?, ?, ?, datetime("now"))',
+			[fleetid,
+			fcname,
+			description])
+
+
+	payload = {'url': 'http://feabell.com:5000/fleet/'+fleetid}
+	return json.dumps(payload)
+	
 
 @app.route('/fleet/<fleetid>', methods=['GET', 'POST'])
 def main(fleetid):
 	if request.method == 'GET':
-		if check_valid(fleetid) and new_pilot(fleetid, request.form.get('Eve-Charid', None)):
+		if check_valid(fleetid, request.headers.get('Eve-Alliancename', None)) and new_pilot(fleetid, request.headers.get('Eve-Charid', None)):
 			name = get_fc_name(fleetid)
-			return render_template('skynet.html', name=name, fleetid=fleetid)
+			description = get_fleet_desc(fleetid)
+			return render_template('skynet.html', name=name, description=description, fleetid=fleetid)
 		else:
 			return render_template('skynet-error.html')
 	elif request.method == 'POST':
-		if check_valid(fleetid) and new_pilot(fleetid, request.form.get('Eve-Charid', None)):
+		if check_valid(fleetid, request.headers.get('Eve-Alliancename', None)) and new_pilot(fleetid, request.form.get('Eve-Charid', None)):
 			print request.form.get('Eve-Charname', None) 
 			#add a pilot record for this fleet
 			insert_db('insert into participants (fleetid, pilotname, pilotid, corpname, shiptypename, feedback, rating) values (?, ?, ?, ?, ?, ?, ?)',
@@ -40,10 +82,10 @@ def main(fleetid):
 
 	return render_template('skynet-success.html')	
 
-def check_valid(fleetid):
+def check_valid(fleetid, alliancename):
 	fleet = query_db('select fleetid, created from fleets where fleetid = ?', [fleetid], one=True)
 
-	if fleet is None:
+	if fleet is None or alliancename != "The WINGSPAN Logo Alliance":
 		return False
 	
 	#only allow access to links created in the last 6 hours
@@ -56,6 +98,7 @@ def new_pilot(fleetid, pilotid):
 	participant = query_db('select fleetid, pilotid from participants where fleetid = ? and pilotid = ?', [fleetid, pilotid], one=True)
 
 	if participant is None:
+		print "no entries in participant", fleetid, ' ', pilotid
 		return True
 
 	return False
@@ -65,6 +108,11 @@ def get_fc_name(fleetid):
 	fleet = query_db('select fleetid, fcname from fleets where fleetid = ?', [fleetid], one=True)
 
 	return fleet['fcname']
+
+def get_fleet_desc(fleetid):
+	fleet = query_db('select fleetid, description from fleets where fleetid = ?', [fleetid], one=True)
+
+	return fleet['description']
 
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
@@ -97,7 +145,6 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
