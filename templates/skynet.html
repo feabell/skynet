@@ -1,25 +1,64 @@
-<!doctype html>
-<title>Skynet Test</title>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>WiNGSPAN Fleet Feedback</title>
+
+<!-- Bootstrap -->
+<link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static',filename='css/bootstrap-theme.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static',filename='css/wds.css') }}" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
 {% if request.headers['Eve-Trusted'] == 'No' %}
   <body onload="CCPEVE.requestTrust('http://feabell.com:5000')">
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}") ></script>
 {% elif request.headers['Eve-Trusted'] == 'Yes' %}
-  <h1>Hello {{ request.headers.get('Eve-charname') }}! You were on {{ name }}'s fleet.</h1>
-  <p>"{{ description }}"
-  <h3>Please rate the fleet and leave some feedback!</h3>
+
+<div class="container" role="main">
+
+  <div class="cold-md-12 jumbotron">
+	<h2><strong>Hello {{ request.headers.get('Eve-charname') }}! You were in {{ name }}'s fleet.</strong></h2>
+  	 <p>"{{ description }}"</p>
+  </div>
+
+  <div class="alert alert-success" role="alert">
+	  <strong>Please rate the fleet and leave some feedback!</strong>
+  </div>
   <form action="/fleet/{{ fleetid }}" method="POST">
 	<input type="hidden" name="fleetid" value="{{ fleetid }}">
 	<input type="hidden" name="Eve-Charname" value="{{ request.headers.get('Eve-Charname') }}">
 	<input type="hidden" name="Eve-Shiptypename" value="{{ request.headers.get('Eve-Shiptypename') }}">
 	<input type="hidden" name="Eve-Charid" value="{{ request.headers.get('Eve-Charid') }}">
 	<input type="hidden" name="Eve-Corpname" value="{{ request.headers.get('Eve-Corpname') }}">
-	(Terrible) 1<input type="radio" name="rating" value="1">
-	<input type="radio" name="rating" value="2">
-	<input type="radio" name="rating" value="3">
-	<input type="radio" name="rating" value="4">
-	<input type="radio" name="rating" value="5"> 5 (Amazing)<br><br>
-	<textarea name="feedback" rows="10" cols="100">Type your feedback here</textarea>
-	<br><input type="submit" value="Submit">
+	<div class="form-inline">
+	<h3>
+		<span class="label label-danger">(Terrible)</span> 
+		<span class="badge">1</span>
+		<input type="radio" class="form-control" name="rating" value="1">
+		<input type="radio" class="form-control" name="rating" value="2">
+		<input type="radio" class="form-control" name="rating" value="3" checked>
+		<input type="radio" class="form-control" name="rating" value="4">
+		<input type="radio" class="form-control" name="rating" value="5"> 
+		<span class="badge">5</span> 
+		<span class="label label-success">(Amazing)</span><br><br>
+	</h3>
+	</div>
+	<textarea class="form-control" name="feedback" rows="10" cols="100">Type your feedback here</textarea>
+	<br><input type="submit" class="btn btn-primary" value="Submit">
   </form>
+</div>
 {% else %}
   <h1>This can only be accessed using the Eve In-game browser</h1>
 {% endif %}
